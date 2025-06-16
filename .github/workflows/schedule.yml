@@ -1,0 +1,26 @@
+name: Scheduled Gold Price Tracker
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # Chạy hàng ngày lúc 6:00 UTC
+  workflow_dispatch:     # Cho phép chạy thủ công
+
+jobs:
+  track-gold-price:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+        
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run Gold Price Tracker
+        run: dotnet run --project GoldCoreSchedule/GoldCoreSchedule.csproj
+        env:
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
