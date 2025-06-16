@@ -11,38 +11,49 @@ if (string.IsNullOrEmpty(serviceAccountKeyJson))
     throw new Exception("Missing FIREBASE_SERVICE_ACCOUNT_KEY environment variable");
 }
 
-// Khởi tạo Firestore với credentials từ environment variable
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", serviceAccountKeyJson);
-FirestoreDb db = FirestoreDb.Create(projectId);
+// Tạo file tạm thời để lưu credentials
+string tempPath = Path.GetTempFileName();
+File.WriteAllText(tempPath, serviceAccountKeyJson);
 
-using (HttpClient client = new HttpClient())
+try 
 {
-    try
+    // Khởi tạo Firestore với credentials từ file tạm
+    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tempPath);
+    FirestoreDb db = FirestoreDb.Create(projectId);
+
+    using (HttpClient client = new HttpClient())
     {
-        // Lấy dữ liệu từ API
-        HttpResponseMessage response = await client.GetAsync(apiUrl);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            string responseBody = await response.Content.ReadAsStringAsync();
+            // Lấy dữ liệu từ API
+            HttpResponseMessage response = await client.GetAsync(apiUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
 
-            // Xử lý dữ liệu
-            var processedData = ProcessData(responseBody);
+                // Xử lý dữ liệu
+                var processedData = ProcessData(responseBody);
 
-            // Lưu vào Firestore
-            string documentId = DateTime.Now.ToString("yyyyMMdd");
-            DocumentReference docRef = db.Collection("gold").Document(documentId);
+                // Lưu vào Firestore
+                string documentId = DateTime.Now.ToString("yyyyMMdd");
+                DocumentReference docRef = db.Collection("gold").Document(documentId);
 
-            await docRef.SetAsync(processedData);
+                await docRef.SetAsync(processedData);
+            }
+            else
+            {
+                Console.WriteLine($"Lỗi: {response.StatusCode}");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine($"Lỗi: {response.StatusCode}");
+            Console.WriteLine($"Lỗi: {ex.Message}");
         }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Lỗi: {ex.Message}");
-    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Lỗi: {ex.Message}");
 }
 
 static dynamic ProcessData(string rawJson)
