@@ -4,10 +4,15 @@ using System.Xml;
 
 string apiUrl = "http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v";
 string projectId = "binance-79016"; // Thay bằng Project ID của bạn
-string pathToServiceAccountKey = "./binance-79016-firebase-adminsdk-r8x0o-2a41cbb89d.json";
 string serviceAccountKeyJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_KEY");
-// Khởi tạo Firestore
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", pathToServiceAccountKey);
+
+if (string.IsNullOrEmpty(serviceAccountKeyJson))
+{
+    throw new Exception("Missing FIREBASE_SERVICE_ACCOUNT_KEY environment variable");
+}
+
+// Khởi tạo Firestore với credentials từ environment variable
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", serviceAccountKeyJson);
 FirestoreDb db = FirestoreDb.Create(projectId);
 
 using (HttpClient client = new HttpClient())
