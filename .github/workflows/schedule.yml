@@ -2,7 +2,7 @@ name: Scheduled Gold Price Tracker
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  # Chạy mỗi 5 phút để test
+    - cron: "0 23 * * *"  # Chạy mỗi 5 phút để test
   workflow_dispatch:
 
 jobs:
