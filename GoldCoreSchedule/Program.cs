@@ -4,11 +4,23 @@ using System.Xml;
 
 string apiUrl = "http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v";
 string projectId = "binance-79016"; // Thay bằng Project ID của bạn
+
+// Thử lấy từ biến môi trường (GitHub Actions)
 string serviceAccountKeyJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_KEY");
 
+// Nếu không có biến môi trường, đọc từ file local
 if (string.IsNullOrEmpty(serviceAccountKeyJson))
 {
-    throw new Exception("Missing FIREBASE_SERVICE_ACCOUNT_KEY environment variable");
+    string localPath = "./binance-79016-firebase-adminsdk-r8x0o-2a41cbb89d.json";
+    if (File.Exists(localPath))
+    {
+        serviceAccountKeyJson = File.ReadAllText(localPath);
+        Console.WriteLine("Đang sử dụng credentials từ file local");
+    }
+    else
+    {
+        throw new Exception("Không tìm thấy credentials. Vui lòng kiểm tra biến môi trường FIREBASE_SERVICE_ACCOUNT_KEY hoặc file local credentials.json");
+    }
 }
 
 // Tạo file tạm thời để lưu credentials
