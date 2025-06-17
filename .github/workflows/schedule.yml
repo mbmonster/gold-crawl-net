@@ -2,8 +2,8 @@ name: Scheduled Gold Price Tracker
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Chạy hàng ngày lúc 6:00 UTC
-  workflow_dispatch:     # Cho phép chạy thủ công
+    - cron: "*/5 * * * *"  # Chạy mỗi 5 phút để test
+  workflow_dispatch:
 
 jobs:
   track-gold-price:
@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
-        
+
       - name: Restore dependencies
         run: dotnet restore
 
